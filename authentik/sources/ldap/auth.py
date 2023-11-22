@@ -44,8 +44,8 @@ class LDAPBackend(InbuiltBackend):
         # This means we check with a bind to see if the LDAP password has changed
         if self.auth_user_by_bind(source, user, password):
             # Password given successfully binds to LDAP, so we save it in our Database
-            LOGGER.debug("Updating user's password in DB", user=user)
-            user.set_password(password, signal=False)
+            # LOGGER.debug("Updating user's password in DB", user=user)
+            # user.set_password(password, signal=False)
             user.save()
             return user
         # Password doesn't match
