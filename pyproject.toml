@@ -119,8 +119,7 @@ jsonpatch = "*"
 kubernetes = "*"
 ldap3 = "*"
 lxml = "*"
-msgraph-sdk = "*"
-opencontainers = { git = "https://github.com/vsoch/oci-python", rev = "20d69d9cc50a0fef31605b46f06da0c94f1ec3cf", extras = ["reggie"] }
+opencontainers = { extras = ["reggie"], version = "*" }
 packaging = "*"
 paramiko = "*"
 psycopg = { extras = ["c"], version = "*" }
