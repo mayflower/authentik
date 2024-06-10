@@ -2,6 +2,7 @@ package direct
 
 import (
 	"context"
+	"regexp"
 
 	"beryju.io/ldap"
 	"github.com/getsentry/sentry-go"
@@ -45,6 +46,10 @@ func (db *DirectBinder) Bind(username string, req *bind.Request) (ldap.LDAPResul
 			"app":          db.si.GetAppSlug(),
 		}).Inc()
 		req.Log().WithError(err).Warning("failed to execute flow")
+		is_server_err, regex_err := regexp.MatchString(`\b5\d\d\b`, err.Error())
+		if regex_err == nil && is_server_err {
+			return ldap.LDAPResultOperationsError, nil
+		}
 		return ldap.LDAPResultInvalidCredentials, nil
 	}
 	if !passed {
