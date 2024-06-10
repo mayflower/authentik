@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"goauthentik.io/internal/outpost/ldap/bind"
 	"goauthentik.io/internal/outpost/ldap/bind/direct"
+	"goauthentik.io/internal/outpost/ldap/flags"
 	"goauthentik.io/internal/outpost/ldap/server"
 )
 
@@ -48,7 +49,7 @@ func (sb *SessionBinder) Bind(username string, req *bind.Request) (ldap.LDAPResu
 		DN:       req.BindDN,
 		Password: req.BindPW,
 	})
-	if item != nil {
+	if item != nil && item.Value() != ldap.LDAPResultOperationsError {
 		sb.log.WithField("bindDN", req.BindDN).Info("authenticated from session")
 		return item.Value(), nil
 	}
@@ -56,15 +57,15 @@ func (sb *SessionBinder) Bind(username string, req *bind.Request) (ldap.LDAPResu
 	result, err := sb.DirectBinder.Bind(username, req)
 	// Only cache the result if there's been an error
 	if err == nil {
-		flags := sb.si.GetFlags(req.BindDN)
-		if flags == nil {
+		flag := sb.si.GetFlags(req.BindDN)
+		if flag == nil || (flag.UserInfo == nil && flag.UserPk == flags.InvalidUserPK) {
 			sb.log.Error("user flags not set after bind")
 			return result, err
 		}
 		sb.sessions.Set(Credentials{
 			DN:       req.BindDN,
 			Password: req.BindPW,
-		}, result, time.Until(flags.Session.Expires))
+		}, result, time.Until(flag.Session.Expires))
 	}
 	return result, err
 }
