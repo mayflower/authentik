@@ -280,7 +280,11 @@ class AssertionProcessor:
         assertion.append(self.get_assertion_conditions())
         assertion.append(self.get_assertion_auth_n_statement())
 
-        assertion.append(self.get_attributes())
+        attribute_statement = self.get_attributes()
+        # https://docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd
+        # check invalid empty AttributeStatement
+        if len(attribute_statement) != 0:
+            assertion.append(attribute_statement)
         return assertion
 
     def get_response(self) -> Element:
