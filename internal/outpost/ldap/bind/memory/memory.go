@@ -54,11 +54,13 @@ func (sb *SessionBinder) Bind(username string, req *bind.Request) (ldap.LDAPResu
 	}
 	sb.log.Debug("No session found for user, executing flow")
 	result, err := sb.DirectBinder.Bind(username, req)
-	// Only cache the result if there's been an error
-	if err == nil {
+	// Cache all non-OperationsError results to preserve positive/negative caching
+	// semantics, but avoid caching transient backend/flow failures which surface
+	// as LDAPResultOperationsError.
+	if err == nil && result != ldap.LDAPResultOperationsError {
 		flags := sb.si.GetFlags(req.BindDN)
-		if flags == nil {
-			sb.log.Error("user flags not set after bind")
+		if flags == nil || flags.Session == nil {
+			sb.log.Error("user flags/session not set after bind")
 			return result, err
 		}
 		sb.sessions.Set(Credentials{

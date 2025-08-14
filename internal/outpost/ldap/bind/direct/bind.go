@@ -46,7 +46,7 @@ func (db *DirectBinder) Bind(username string, req *bind.Request) (ldap.LDAPResul
 			"app":          db.si.GetAppSlug(),
 		}).Inc()
 		req.Log().WithError(err).Warning("failed to execute flow")
-		return ldap.LDAPResultInvalidCredentials, nil
+		return ldap.LDAPResultOperationsError, nil
 	}
 	if !passed {
 		metrics.RequestsRejected.With(prometheus.Labels{
