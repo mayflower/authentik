@@ -46,6 +46,12 @@ func (db *DirectBinder) Bind(username string, req *bind.Request) (ldap.LDAPResul
 			"app":          db.si.GetAppSlug(),
 		}).Inc()
 		req.Log().WithError(err).Warning("failed to execute flow")
+		if err.Error() == "flow error non_field_errors: Failed to authenticate." {
+			return ldap.LDAPResultNoSuchObject, nil
+		}
+		if err.Error() == "flow error password: Invalid password" {
+			return ldap.LDAPResultInvalidCredentials, nil
+		}
 		return ldap.LDAPResultOperationsError, nil
 	}
 	if !passed {
