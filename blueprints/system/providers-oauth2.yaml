@@ -24,7 +24,7 @@ entries:
       expression: |
         return {
             "email": request.user.email,
-            "email_verified": False
+            "email_verified": True # ADMIN-23583
         }
   - identifiers:
       managed: goauthentik.io/providers/oauth2/scope-profile
